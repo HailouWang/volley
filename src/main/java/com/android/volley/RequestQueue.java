@@ -99,11 +99,15 @@ public class RequestQueue {
 
     /**
      * Creates the worker pool. Processing will not begin until {@link #start()} is called.
-     *
+     *创建一个工作池，非start方法调用前，不会开始执行
      * @param cache A Cache to use for persisting responses to disk
+     * 1、缓存者。将相应数据持久化到硬盘
      * @param network A Network interface for performing HTTP requests
+     * 2、网络处理者。处理HTTP请求的Network 接口
      * @param threadPoolSize Number of network dispatcher threads to create
+     * 3、网络请求分发者。默认4个分发线程池
      * @param delivery A ResponseDelivery interface for posting responses and errors
+     * 4、响应传递者。传递响应数据，以及错误日志信息
      */
     public RequestQueue(Cache cache, Network network, int threadPoolSize,
             ResponseDelivery delivery) {

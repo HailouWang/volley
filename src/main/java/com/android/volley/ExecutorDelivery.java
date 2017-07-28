@@ -89,6 +89,7 @@ public class ExecutorDelivery implements ResponseDelivery {
         @Override
         public void run() {
             // If this request has canceled, finish it and don't deliver.
+            //1、如果请求已经取消，则不必传递
             if (mRequest.isCanceled()) {
                 mRequest.finish("canceled-at-delivery");
                 return;
@@ -96,13 +97,16 @@ public class ExecutorDelivery implements ResponseDelivery {
 
             // Deliver a normal response or error, depending.
             if (mResponse.isSuccess()) {
+                //2、如果Response没有错误，则分发result
                 mRequest.deliverResponse(mResponse.result);
             } else {
+                //3、如果Reponse有错误，则分发error
                 mRequest.deliverError(mResponse.error);
             }
 
             // If this is an intermediate response, add a marker, otherwise we're done
             // and the request can be finished.
+            //4、如果 响应属于媒介
             if (mResponse.intermediate) {
                 mRequest.addMarker("intermediate-response");
             } else {

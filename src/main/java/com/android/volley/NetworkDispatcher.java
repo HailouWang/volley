@@ -87,6 +87,7 @@ public class NetworkDispatcher extends Thread {
             Request<?> request;
             try {
                 // Take a request from the queue.
+                //1、从请求队列中，拿到Request
                 request = mQueue.take();
             } catch (InterruptedException e) {
                 // We may have been interrupted because it was time to quit.
@@ -101,6 +102,7 @@ public class NetworkDispatcher extends Thread {
 
                 // If the request was cancelled already, do not perform the
                 // network request.
+                //2、如果请求已经被取消了，那么也不再需要
                 if (request.isCanceled()) {
                     request.finish("network-discard-cancelled");
                     continue;
@@ -109,28 +111,33 @@ public class NetworkDispatcher extends Thread {
                 addTrafficStatsTag(request);
 
                 // Perform the network request.
+                //3、网络处理requests，并返回NetworkResponse
                 NetworkResponse networkResponse = mNetwork.performRequest(request);
                 request.addMarker("network-http-complete");
 
                 // If the server returned 304 AND we delivered a response already,
                 // we're done -- don't deliver a second identical response.
+                //4、如果服务器返回状态码 = 304，同时该请求Request已经传递过，则不需要再次响应传递。
                 if (networkResponse.notModified && request.hasHadResponseDelivered()) {
                     request.finish("not-modified");
                     continue;
                 }
 
                 // Parse the response here on the worker thread.
+                //5、解析请求响应数据，得到Response数据
                 Response<?> response = request.parseNetworkResponse(networkResponse);
                 request.addMarker("network-parse-complete");
 
                 // Write to cache if applicable.
                 // TODO: Only update cache metadata instead of entire record for 304s.
+                //6、是否需要缓存并含有缓存数据，如果是，将cache数据加入到mCache
                 if (request.shouldCache() && response.cacheEntry != null) {
                     mCache.put(request.getCacheKey(), response.cacheEntry);
                     request.addMarker("network-cache-written");
                 }
 
                 // Post the response back.
+                //7、将reponse 返回
                 request.markDelivered();
                 mDelivery.postResponse(request, response);
             } catch (VolleyError volleyError) {
