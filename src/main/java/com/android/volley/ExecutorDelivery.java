@@ -106,7 +106,7 @@ public class ExecutorDelivery implements ResponseDelivery {
 
             // If this is an intermediate response, add a marker, otherwise we're done
             // and the request can be finished.
-            //4、如果 响应属于媒介
+            //4、如果 响应属于媒介，标记marker
             if (mResponse.intermediate) {
                 mRequest.addMarker("intermediate-response");
             } else {
